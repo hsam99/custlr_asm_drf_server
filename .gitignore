@@ -1,2 +1,6 @@
 .vscode/
 media/
+*.log
+*.pot
+*.pyc
+__pycache__/
