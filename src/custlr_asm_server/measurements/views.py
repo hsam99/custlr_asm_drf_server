@@ -1,5 +1,5 @@
 from django.shortcuts import render
-import matlab.engine
+import Custlr_ASM_Server_Front_v2 as custlr_asm
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -12,10 +12,9 @@ from rest_framework.views import APIView
 
 # calls matlab function with image path
 def asm_model(image_path):
-    eng = matlab.engine.start_matlab()
-    eng.cd(r'.\matlab')
-    ans = eng.Custlr_ASM_Server_Front_v2(image_path)
-    eng.close()
+    init = custlr_asm.initialize()
+    ans = init.Custlr_ASM_Server_Front_v2(image_path)
+    custlr_asm.__exit_packages()
     return ans
 
 
@@ -39,7 +38,7 @@ def image_post(request, format=None):
         if image_serializer.is_valid():
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
                                   arm_size=0, waist=0, arm_length=0)
-            image_path = '..' + str(image_serializer.data['image'])
+            image_path = '.' + str(image_serializer.data['image'])
             measurements = asm_model(image_path)
             cleaned_measurements = split_measurement(measurements)
             image_instance.chest = chest=cleaned_measurements[0]
