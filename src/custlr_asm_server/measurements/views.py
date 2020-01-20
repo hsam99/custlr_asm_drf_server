@@ -6,8 +6,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.decorators import parser_classes
 from rest_framework.parsers import JSONParser, MultiPartParser
-from .serializers import ImageSerializer
+from .serializers import ImageSerializer, MeasurementSerializer
 from .models import Image
+from rest_framework.views import APIView
 
 # calls matlab function with image path
 def asm_model(image_path):
@@ -28,7 +29,7 @@ def split_measurement(measurement_str):
     return measurements
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 @parser_classes([JSONParser, MultiPartParser])
 def image_post(request, format=None):
     if request.FILES:
@@ -39,7 +40,6 @@ def image_post(request, format=None):
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
                                   arm_size=0, waist=0, arm_length=0)
             image_path = '..' + str(image_serializer.data['image'])
-            print(image_path)
             measurements = asm_model(image_path)
             cleaned_measurements = split_measurement(measurements)
             image_instance.chest = chest=cleaned_measurements[0]
@@ -54,15 +54,12 @@ def image_post(request, format=None):
         else:
             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # else:
-    #     return Response({'message': 'Image not found'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'message': 'Image not found'}, status=status.HTTP_400_BAD_REQUEST)
 
-    #test for get request
-    if request.method == 'GET':
-        image = Image.objects.last()
-        if image:
-            image_path = '/media/' + str(image.image)
-            html = "<html><body><img src='%s'/></body></html>" % image_path
-            return HttpResponse(html)
-        else:
-            return Response({'message': 'No images found'})
+
+class GetMeasurements(APIView):
+    def get(self, request, format=None):
+        measurements = Image.objects.filter(user=request.user)
+        serializer = MeasurementSerializer(measurements, many=True)
+        return Response(serializer.data)
