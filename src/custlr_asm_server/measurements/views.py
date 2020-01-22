@@ -13,7 +13,10 @@ from rest_framework.views import APIView
 # calls matlab function with image path
 def asm_model(image_path):
     init = custlr_asm.initialize()
-    ans = init.Custlr_ASM_Server_Front_v2(image_path)
+    try:
+        ans = init.Custlr_ASM_Server_Front_v2(image_path)
+    except:
+        ans = -1
     custlr_asm.__exit_packages()
     return ans
 
@@ -40,6 +43,9 @@ def image_post(request, format=None):
                                   arm_size=0, waist=0, arm_length=0)
             image_path = '.' + str(image_serializer.data['image'])
             measurements = asm_model(image_path)
+            if measurements == -1:
+                image_instance.delete()
+                return Response({'error': 'The system is unable to process the image. Please try again.'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             cleaned_measurements = split_measurement(measurements)
             image_instance.chest = chest=cleaned_measurements[0]
             image_instance.shoulder = cleaned_measurements[1]

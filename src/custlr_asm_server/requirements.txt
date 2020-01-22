@@ -1,7 +1,6 @@
 Django==2.2.7
 djangorestframework==3.10.3
 djangorestframework-jwt==1.11.0
-matlabruntimeforpython===R2018b
 mysqlclient==1.4.5
 Pillow==6.2.1
 PyJWT==1.7.1
