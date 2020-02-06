@@ -1,5 +1,6 @@
 .vscode/
 media/
+sent_emails/
 *.log
 *.pot
 *.pyc

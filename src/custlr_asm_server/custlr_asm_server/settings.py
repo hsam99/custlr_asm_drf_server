@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_auth',
     'measurements.apps.MeasurementsConfig',
     'accounts.apps.AccountsConfig',
 ]
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'custlr_asm_server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,6 +71,10 @@ TEMPLATES = [
         },
     },
 ]
+
+# REST_AUTH_SERIALIZERS = {
+#     'PASSWORD_RESET_CONFIRM_SERIALIZER': 'accounts.serializers.PasswordResetConfirmSerializer'
+# }
 
 AUTH_USER_MODEL = 'accounts.Account'
 
@@ -109,6 +114,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_USE_JWT = True
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+
 # JWT settings
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':
@@ -138,7 +148,7 @@ JWT_AUTH = {
     'JWT_AUDIENCE': None,
     'JWT_ISSUER': None,
 
-    'JWT_ALLOW_REFRESH': True,
+    'JWT_ALLOW_REFRESH': False,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 
     'JWT_AUTH_HEADER_PREFIX': 'Bearer',
@@ -151,6 +161,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
     ),
 }
 

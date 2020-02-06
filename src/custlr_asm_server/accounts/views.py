@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from .models import Account
 from .serializers import CreateAccountSerializer, TokenSerializer, LoginSerializer
 from django.contrib.auth import authenticate
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework_jwt.settings import api_settings
+from rest_auth.views import PasswordResetConfirmView
 
 # Get the JWT settings
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -14,6 +16,13 @@ class CreateAccountView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Account.objects.all()
     serializer_class = CreateAccountSerializer
+
+# class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+#     renderer_classes = [TemplateHTMLRenderer]
+#     template_name = "accounts/password_reset_confirm.html"
+
+#     def get(self, request, *args, **kwargs):
+#         return Response({'error': 'The system is unable to process the image. Please try again.'})
 
 
 # class LoginView(generics.CreateAPIView):
