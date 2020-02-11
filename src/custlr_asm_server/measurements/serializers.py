@@ -9,4 +9,4 @@ class ImageSerializer(serializers.ModelSerializer):
 class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model   = Image
-        fields  = ["image", "chest", "shoulder", "arm_size", "waist", "arm_length"]
+        fields  = ["image", "chest", "shoulder", "arm_size", "waist", "arm_length", "date_created"]

@@ -9,14 +9,16 @@ from rest_framework.parsers import JSONParser, MultiPartParser
 from .serializers import ImageSerializer, MeasurementSerializer
 from .models import Image
 from rest_framework.views import APIView
+from datetime import datetime
 
 # calls matlab function with image path
-def asm_model(image_path):
+def asm_model(image_path, image_instance):
     init = custlr_asm.initialize()
     try:
         ans = init.Custlr_ASM_Server_Front_v2(image_path)
     except:
         ans = -1
+        image_instance.delete()
     custlr_asm.__exit_packages()
     return ans
 
@@ -40,14 +42,13 @@ def image_post(request, format=None):
 
         if image_serializer.is_valid():
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
-                                  arm_size=0, waist=0, arm_length=0)
+                                  arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
             image_path = '.' + str(image_serializer.data['image'])
-            measurements = asm_model(image_path)
+            measurements = asm_model(image_path, image_instance)
             if measurements == -1:
-                image_instance.delete()
                 return Response({'error': 'The system is unable to process the image. Please try again.'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
             cleaned_measurements = split_measurement(measurements)
-            image_instance.chest = chest=cleaned_measurements[0]
+            image_instance.chest = cleaned_measurements[0]
             image_instance.shoulder = cleaned_measurements[1]
             image_instance.arm_size = cleaned_measurements[2] 
             image_instance.waist = cleaned_measurements[3] 
