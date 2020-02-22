@@ -119,6 +119,17 @@ REST_USE_JWT = True
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
 
+# sendgrid settings
+
+# SENDGRID_API_KEY = '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'
+
+# EMAIL_HOST = 'smtp.sendgrid.net'
+# EMAIL_HOST_USER = ''
+# EMAIL_HOST_PASSWORD = ''
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 # JWT settings
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':

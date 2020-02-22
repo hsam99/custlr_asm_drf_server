@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_jwt.views import obtain_jwt_token
-from rest_auth.views import PasswordResetView, PasswordResetConfirmView
+from rest_auth.views import PasswordResetView, PasswordResetConfirmView, PasswordChangeView
 from . import views
 from django.views.generic import TemplateView
 from django.conf.urls import url
@@ -13,4 +13,5 @@ urlpatterns = [
         name='password_reset_confirm'),
     path('password/reset/', PasswordResetView.as_view(), name='rest_password_reset'),
     path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='rest_password_reset_confirm'),
+    path('password/change/', PasswordChangeView.as_view(), name='rest_password_change'),
 ]

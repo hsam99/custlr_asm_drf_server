@@ -1,5 +1,5 @@
 from django.shortcuts import render
-import Custlr_ASM_Server_Front_v2 as custlr_asm
+# import Custlr_ASM_Server_Front_v2 as custlr_asm
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -12,15 +12,15 @@ from rest_framework.views import APIView
 from datetime import datetime
 
 # calls matlab function with image path
-def asm_model(image_path, image_instance):
-    init = custlr_asm.initialize()
-    try:
-        ans = init.Custlr_ASM_Server_Front_v2(image_path)
-    except:
-        ans = -1
-        image_instance.delete()
-    custlr_asm.__exit_packages()
-    return ans
+# def asm_model(image_path, image_instance):
+#     init = custlr_asm.initialize()
+#     try:
+#         ans = init.Custlr_ASM_Server_Front_v2(image_path)
+#     except:
+#         ans = -1
+#         image_instance.delete()
+#     custlr_asm.__exit_packages()
+#     return ans
 
 
 def split_measurement(measurement_str):
@@ -33,35 +33,35 @@ def split_measurement(measurement_str):
     return measurements
 
 
-@api_view(['POST'])
-@parser_classes([JSONParser, MultiPartParser])
-def image_post(request, format=None):
-    if request.FILES:
-        data = request.FILES
-        image_serializer = ImageSerializer(data=data)
+# @api_view(['POST'])
+# @parser_classes([JSONParser, MultiPartParser])
+# def image_post(request, format=None):
+#     if request.FILES:
+#         data = request.FILES
+#         image_serializer = ImageSerializer(data=data)
 
-        if image_serializer.is_valid():
-            image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
-                                  arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
-            image_path = '.' + str(image_serializer.data['image'])
-            measurements = asm_model(image_path, image_instance)
-            if measurements == -1:
-                return Response({'error': 'The system is unable to process the image. Please try again.'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-            cleaned_measurements = split_measurement(measurements)
-            image_instance.chest = cleaned_measurements[0]
-            image_instance.shoulder = cleaned_measurements[1]
-            image_instance.arm_size = cleaned_measurements[2] 
-            image_instance.waist = cleaned_measurements[3] 
-            image_instance.arm_length = cleaned_measurements[4]
-            image_instance.save()
+#         if image_serializer.is_valid():
+#             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
+#                                   arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
+#             image_path = '.' + str(image_serializer.data['image'])
+#             measurements = asm_model(image_path, image_instance)
+#             if measurements == -1:
+#                 return Response({'error': 'The system is unable to process the image. Please try again.'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+#             cleaned_measurements = split_measurement(measurements)
+#             image_instance.chest = cleaned_measurements[0]
+#             image_instance.shoulder = cleaned_measurements[1]
+#             image_instance.arm_size = cleaned_measurements[2] 
+#             image_instance.waist = cleaned_measurements[3] 
+#             image_instance.arm_length = cleaned_measurements[4]
+#             image_instance.save()
 
-            return Response(measurements, status=status.HTTP_201_CREATED)
+#             return Response(measurements, status=status.HTTP_201_CREATED)
 
-        else:
-            return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    else:
-        return Response({'message': 'Image not found'}, status=status.HTTP_400_BAD_REQUEST)
+#     else:
+#         return Response({'message': 'Image not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetMeasurements(APIView):
