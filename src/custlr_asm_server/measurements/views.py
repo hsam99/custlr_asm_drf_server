@@ -41,7 +41,7 @@ def split_measurement(measurement_str):
     temp = measurement_str.split('\n')
     
     for i in range(1,6):
-        measurements.append(float(temp[i].split(": ")[1]))
+        measurements.append(round(float(temp[i].split(": ")[1]), 2))
 
     return measurements
 
@@ -49,6 +49,8 @@ def split_measurement(measurement_str):
 @api_view(['POST'])
 @parser_classes([JSONParser, MultiPartParser])
 def image_post(request, format=None):
+    uri = request.build_absolute_uri()
+    url = uri.rsplit('/', 2)[0]
     if request.FILES:
         data = request.FILES
         image_serializer = ImageSerializer(data=data)
@@ -57,7 +59,8 @@ def image_post(request, format=None):
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
                                   arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
             image_path = '..' + str(image_serializer.data['image'])
-            
+            image_url = url + str(image_serializer.data['image'])
+
             # image_path for matlab custlr library
             # image_path = '.' + str(image_serializer.data['image'])
             measurements = asm_model(image_path, image_instance)
@@ -71,7 +74,13 @@ def image_post(request, format=None):
             image_instance.arm_length = cleaned_measurements[4]
             image_instance.save()
 
-            return Response(measurements, status=status.HTTP_201_CREATED)
+            return Response({"chest": cleaned_measurements[0], 
+                            "shoulder": cleaned_measurements[1],
+                            "arm_size": cleaned_measurements[2],
+                            "waist": cleaned_measurements[3],
+                            "arm_length": cleaned_measurements[4],
+                            "image_url": image_url
+            }, status=status.HTTP_201_CREATED)
 
         else:
             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
