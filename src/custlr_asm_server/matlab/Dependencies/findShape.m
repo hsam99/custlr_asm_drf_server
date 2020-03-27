@@ -1,4 +1,4 @@
-function varargout = findShape(im_original, shapeModel, grayModel, debug, varargin)
+function [image_landmarks, varargout] = findShape(im_original, shapeModel, grayModel, debug, varargin)
 % EDIT
 % Modified for server code
 %
@@ -253,8 +253,14 @@ x_final = x_new*downsampleFactor;
 x_original_estimate = x_original_estimate*downsampleFactor; % For final display
 
 % Compare the original estimate with the final evolution
-if debugg
-    figure, hold on, imshow(im_original,[]); 
+if true
+    dir_name = pwd;
+    if ~exist('Results', 'dir')
+       mkdir(fullfile(dir_name, 'Results'));
+    end
+    res_name = strcat(dir_name, '\Results\');
+    
+    figure, hold on, imshow(im_original, []);
     %plot the predicted landmarks    
     for n = 1:(size(x_final, 1) / 2)
         hold on,
@@ -291,14 +297,26 @@ if debugg
     
     hold off;
     
+    alphabets = 'a':'z';
+    rng('shuffle');
+    index_alphabet = randi(length(alphabets), 1, 15);
+    rand_num = num2str(randi([1 1e4],1,1));
+    rand_file_name = strcat(alphabets(index_alphabet), rand_num, '.jpg');
+    % Saving the file
+    F = getframe;
+    res_filename = strcat(res_name, rand_file_name);
+    imwrite(F.cdata, res_filename);
+
 end
 
 % Output final shape and model parameters
 if nargout == 1
     varargout{1} = x_final;
+    image_landmarks = res_filename;
 elseif nargout == 2
     varargout{1} = x_final;
     varargout{2} = b;
+    image_landmarks = res_filename;
 end, toc
 
 end % End of main

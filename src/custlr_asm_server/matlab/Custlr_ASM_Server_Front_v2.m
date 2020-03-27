@@ -1,4 +1,4 @@
-function [key_measurements] = Custlr_ASM_Server_Front_v2(img_path)
+function [image_landmarks, key_measurements] = Custlr_ASM_Server_Front_v2(img_path)
 
 % Function that accepts an image of a frontal person and performs ASM on it to identify the 5 key points
 % 
@@ -44,7 +44,7 @@ img = imresize(img, [504 378]); %resize image to 504x378 to work with algorithm
 
 %apply ASM algorithm to the image
 %takes about 5 seconds.
-landmarks_predicted = findShape(img, shapeModel_99, grayModel_99, debug);
+[image_saved, landmarks_predicted] = findShape(img, shapeModel_99, grayModel_99, debug);
 
 %obtain 5 key landmarks pixel distance
 [chest_pixels, shoulder_pixels, arm_size_pixels, waist_pixels, arm_length_pixels] = getPixelDistance(landmarks_predicted);
@@ -74,7 +74,7 @@ if(A4_detected == true)
     %reference https://vteams.com/blog/php-and-matlab-interfacing/
     
     key_measurements = sprintf('CM \nCHEST: %f\nSHOULDER: %f\nARM_SIZE: %f\nWAIST: %f\nARM_LENGTH: %f\n', chest_measurement, shoulder_measurement, arm_size_measurement, waist_measurement, arm_length_measurement);
-    
+    image_landmarks = image_saved;
 else
     
     %No ratio, so just give back the pixels
@@ -82,6 +82,7 @@ else
     %reference https://vteams.com/blog/php-and-matlab-interfacing/
     
     key_measurements = sprintf('PIXEL(504x378) \nCHEST: %f\nSHOULDER: %f\nARM_SIZE: %f\nWAIST: %f\nARM_LENGTH: %f\n', chest_pixels, shoulder_pixels, arm_size_pixels, waist_pixels, arm_length_pixels);
+    image_landmarks = image_saved;
 end
 
 %========= INTERNAL FUNCTIONS ============

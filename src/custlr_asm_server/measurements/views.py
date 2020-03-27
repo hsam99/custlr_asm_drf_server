@@ -10,6 +10,9 @@ from .serializers import ImageSerializer, MeasurementSerializer
 from .models import Image
 from rest_framework.views import APIView
 from datetime import datetime
+from django.core.files import File
+import os
+
 
 # matlab engine api
 import matlab.engine
@@ -17,12 +20,15 @@ def asm_model(image_path, image_instance):
     eng = matlab.engine.start_matlab()
     eng.cd(r'.\matlab')
     try:
-        ans = eng.Custlr_ASM_Server_Front_v2(image_path)
-    except:
+        image_landmark, ans = eng.Custlr_ASM_Server_Front_v2(image_path, nargout=2)
+
+    except Exception as e:
+        print(e)
         ans = -1
+        image_landmark = None
         image_instance.delete()
     eng.close()
-    return ans
+    return image_landmark, ans
 
 # calls matlab function with image path
 # def asm_model(image_path, image_instance):
@@ -59,27 +65,34 @@ def image_post(request, format=None):
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
                                   arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
             image_path = '..' + str(image_serializer.data['image'])
-            image_url = url + str(image_serializer.data['image'])
 
             # image_path for matlab custlr library
             # image_path = '.' + str(image_serializer.data['image'])
-            measurements = asm_model(image_path, image_instance)
+            image_landmark, measurements = asm_model(image_path, image_instance)
+
             if measurements == -1:
-                return Response({'error': 'The system is unable to process the image. Please try again.'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                return Response({'error': 'The system is unable to process the image. Please try again.'}, 
+                                    status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                                
             cleaned_measurements = split_measurement(measurements)
             image_instance.chest = cleaned_measurements[0]
             image_instance.shoulder = cleaned_measurements[1]
             image_instance.arm_size = cleaned_measurements[2] 
             image_instance.waist = cleaned_measurements[3] 
             image_instance.arm_length = cleaned_measurements[4]
+            image_instance.image_landmark.save(os.path.basename(image_landmark), File(open(image_landmark, 'rb')))
             image_instance.save()
+
+            landmark_image_url = url + r'/media/images/' + os.path.basename(image_landmark)
+            original_image_url = url + str(image_serializer.data['image'])
 
             return Response({"chest": cleaned_measurements[0], 
                             "shoulder": cleaned_measurements[1],
                             "arm_size": cleaned_measurements[2],
                             "waist": cleaned_measurements[3],
                             "arm_length": cleaned_measurements[4],
-                            "image_url": image_url
+                            "landmark_image_url": landmark_image_url,
+                            "original_image_url": original_image_url,
             }, status=status.HTTP_201_CREATED)
 
         else:
