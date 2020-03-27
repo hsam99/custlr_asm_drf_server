@@ -107,3 +107,16 @@ class GetMeasurements(APIView):
         measurements = Image.objects.filter(user=request.user)
         serializer = MeasurementSerializer(measurements, many=True)
         return Response(serializer.data)
+
+
+class GetMeasurementsById(APIView):
+    def get(self, request, id, format=None):
+        uri = request.build_absolute_uri()
+        domain_url = uri.rsplit('/', 4)[0]
+
+        measurement = Image.objects.get(id=id)
+        serializer = MeasurementSerializer(measurement)
+        response = serializer.data
+        response['image_landmark'] = domain_url + serializer.data['image_landmark']
+        response['image'] = domain_url + serializer.data['image']
+        return Response(response)
