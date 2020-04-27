@@ -7,7 +7,7 @@ from django.conf.urls import url
 
 urlpatterns = [
     path('signup/', views.CreateAccountView.as_view(), name='create-user'),
-    path('login/', obtain_jwt_token, name='login'),
+    path('login/', views.LoginView.as_view(), name='login'),
     url(r'^password-reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         TemplateView.as_view(template_name="password_reset_confirm.html"),
         name='password_reset_confirm'),
