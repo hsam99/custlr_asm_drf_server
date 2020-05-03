@@ -1,6 +1,6 @@
 import django.contrib.auth.password_validation as validators
 from rest_framework import serializers
-from accounts.models import Account
+from .models import Account
 from rest_framework.response import Response
 
 class CreateAccountSerializer(serializers.ModelSerializer):
@@ -20,14 +20,14 @@ class CreateAccountSerializer(serializers.ModelSerializer):
         user        = Account.objects.create_user(username=username, email=email, password=password)
         return user
 
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=45, required=True)
-    password = serializers.CharField(max_length=45, required=True)
+# class LoginSerializer(serializers.Serializer):
+#     username = serializers.CharField(max_length=45, required=True)
+#     password = serializers.CharField(max_length=45, required=True)
 
 
-class TokenSerializer(serializers.Serializer):
-    token = serializers.CharField(max_length=255)
-    message = serializers.CharField(max_length=255)
+# class TokenSerializer(serializers.Serializer):
+#     token = serializers.CharField(max_length=255)
+#     message = serializers.CharField(max_length=255)
 
 
 # class PasswordResetConfirmSerializer(serializers.Serializer):
