@@ -1,3 +1,6 @@
+# this file specifies the required input parameters in the view functions of recording the measurements
+
+
 from rest_framework import serializers
 from .models import Image
 

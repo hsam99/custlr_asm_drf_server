@@ -1,5 +1,7 @@
+# calls the functions related to body measurements based on which url is called in urls.py
+
+
 from django.shortcuts import render
-# import Custlr_ASM_Server_Front_v2 as custlr_asm
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -16,30 +18,19 @@ import os
 
 # matlab engine api
 import matlab.engine
+# integrates matlab image processing function into python
 def asm_model(image_path, image_instance):
     eng = matlab.engine.start_matlab()
     eng.cd(r'.\matlab')
     try:
-        image_landmark, ans = eng.Custlr_ASM_Server_Front_v2(image_path, nargout=2)
+        image_landmark, measurement = eng.Custlr_ASM_Server_Front_v2(image_path, nargout=2)
 
     except Exception as e:
-        print(e)
         ans = -1
         image_landmark = None
         image_instance.delete()
     eng.close()
-    return image_landmark, ans
-
-# calls matlab function with image path
-# def asm_model(image_path, image_instance):
-#     init = custlr_asm.initialize()
-#     try:
-#         ans = init.Custlr_ASM_Server_Front_v2(image_path)
-#     except:
-#         ans = -1
-#         image_instance.delete()
-#     custlr_asm.__exit_packages()
-#     return ans
+    return image_landmark, measurement
 
 
 def split_measurement(measurement_str):
@@ -51,7 +42,8 @@ def split_measurement(measurement_str):
 
     return measurements
 
-
+# receives a POST request with an image as input and calls the matlab image processing function
+# return response of body measurements detected by the matlab function
 @api_view(['POST'])
 @parser_classes([JSONParser, MultiPartParser])
 def image_post(request, format=None):
@@ -65,11 +57,10 @@ def image_post(request, format=None):
             image_instance = image_serializer.save(user=request.user, chest=0, shoulder=0,
                                   arm_size=0, waist=0, arm_length=0, date_created=datetime.now())
             image_path = '..' + str(image_serializer.data['image'])
-
-            # image_path for matlab custlr library
-            # image_path = '.' + str(image_serializer.data['image'])
+            # calls the matlab function with the image path sent from client side as input
             image_landmark, measurements = asm_model(image_path, image_instance)
 
+            # matlab image processing function gives error
             if measurements == -1:
                 return Response({'error': 'The system is unable to process the image. Please try again.'}, 
                                     status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -102,6 +93,7 @@ def image_post(request, format=None):
         return Response({'message': 'Image not found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# returns a list of saved image in the database based on user's request
 class GetMeasurements(APIView):
     def get(self, request, format=None):
         measurements = Image.objects.filter(user=request.user)
@@ -109,6 +101,7 @@ class GetMeasurements(APIView):
         return Response(serializer.data)
 
 
+# returns the body measurements and image with landmark detected based on the id of the saved image
 class GetMeasurementsById(APIView):
     def get(self, request, id, format=None):
         uri = request.build_absolute_uri()

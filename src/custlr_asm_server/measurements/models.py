@@ -1,3 +1,6 @@
+# the function for this file is to create models related to user accounts in the database
+
+
 from django.db import models
 from accounts.models import Account
 

@@ -1,3 +1,6 @@
+# this file specifies the url path of the server and calls the function associated with the url
+
+
 from django.urls import path
 from . import views
 
