@@ -1,4 +1,4 @@
-# the function for this file is to create models related to user accounts in the database
+# the function for this file is to create a model related to image and measurements storage in the database
 
 
 from django.db import models
