@@ -26,7 +26,7 @@ def asm_model(image_path, image_instance):
         image_landmark, measurement = eng.Custlr_ASM_Server_Front_v2(image_path, nargout=2)
 
     except Exception as e:
-        ans = -1
+        measurement = -1
         image_landmark = None
         image_instance.delete()
     eng.close()
